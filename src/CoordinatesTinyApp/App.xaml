@@ -3,5 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#D1D5DB" />
+        <Style TargetType="Button">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="Padding" Value="14,6" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="MatrixCellStyle" TargetType="TextBox">
+            <Setter Property="MinWidth" Value="120" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="HorizontalContentAlignment" Value="Right" />
+            <Setter Property="MaxLength" Value="64" />
+        </Style>
+        <Style x:Key="TranslationCellStyle" TargetType="TextBox">
+            <Setter Property="Width" Value="190" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="Background" Value="#F3F4F6" />
+            <Setter Property="IsReadOnly" Value="True" />
+        </Style>
     </Application.Resources>
 </Application>

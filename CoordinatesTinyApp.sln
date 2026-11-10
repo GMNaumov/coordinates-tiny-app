@@ -4,6 +4,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoordinatesTinyApp", "src\CoordinatesTinyApp\CoordinatesTinyApp.csproj", "{D4B4B889-47C2-4E8F-9E83-913432E18C12}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{06C13D09-ABD5-4141-AE69-D9E513259612}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinatesTinyApp.Checks", "tests\CoordinatesTinyApp.Checks\CoordinatesTinyApp.Checks.csproj", "{F0653343-A81E-441C-891E-BC0F3589A826}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,8 +18,15 @@ Global
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0653343-A81E-441C-891E-BC0F3589A826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0653343-A81E-441C-891E-BC0F3589A826}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0653343-A81E-441C-891E-BC0F3589A826}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0653343-A81E-441C-891E-BC0F3589A826}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F0653343-A81E-441C-891E-BC0F3589A826} = {06C13D09-ABD5-4141-AE69-D9E513259612}
 	EndGlobalSection
 EndGlobal

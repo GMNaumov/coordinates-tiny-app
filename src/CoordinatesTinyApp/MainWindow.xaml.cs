@@ -12,7 +12,6 @@ namespace CoordinatesTinyApp;
 public partial class MainWindow : Window
 {
     private const int MatrixSize = 4;
-    private const long MaxInputFileLength = 64 * 1024;
 
     private readonly TextBox[,] _cellTextBoxes;
     private TransformationMap? _currentMap;
@@ -48,28 +47,15 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog(this) != true)
             return;
 
-        string extension = Path.GetExtension(dialog.FileName);
-
-        if (!extension.Equals(".xml", StringComparison.OrdinalIgnoreCase)
-            && !extension.Equals(".txt", StringComparison.OrdinalIgnoreCase))
-        {
-            ShowError("Поддерживаются только файлы .txt и .xml.");
-            return;
-        }
-
         try
         {
-            var fileInfo = new FileInfo(dialog.FileName);
-
-            if (fileInfo.Length > MaxInputFileLength)
-            {
-                ShowError("Размер файла превышает 64 КБ.");
-                return;
-            }
-
-            string xml = File.ReadAllText(dialog.FileName);
+            string xml = TransformationMapFileReader.ReadXml(dialog.FileName);
             InputTextBox.Text = xml;
             LoadMap(xml);
+        }
+        catch (FormatException exception)
+        {
+            ShowError(exception.Message);
         }
         catch (IOException exception)
         {

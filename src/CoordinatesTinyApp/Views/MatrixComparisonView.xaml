@@ -1,0 +1,71 @@
+<UserControl x:Class="CoordinatesTinyApp.Views.MatrixComparisonView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="220" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="Сравнение матриц" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock Text="Вставьте два блока TransformationMap или загрузите их из файлов .txt/.xml (до 64 КБ каждый)."
+                       Margin="0,5,0,0" Foreground="#4B5563" TextWrapping="Wrap" />
+            <TextBlock Text="Сравниваются все 16 числовых значений без допуска. 0 и −0 считаются равными."
+                       Margin="0,5,0,0" Foreground="#4B5563" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="Первая матрица" Padding="12" Margin="0,0,7,0">
+                <DockPanel>
+                    <Button DockPanel.Dock="Bottom" Content="Открыть файл…" HorizontalAlignment="Left"
+                            Margin="0,10,0,0" Click="OpenFirstFileButton_Click" />
+                    <TextBox x:Name="FirstInputTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas" SpellCheck.IsEnabled="False"
+                             AutomationProperties.Name="XML первой матрицы" TextChanged="InputTextBox_TextChanged" />
+                </DockPanel>
+            </GroupBox>
+
+            <GroupBox Grid.Column="1" Header="Вторая матрица" Padding="12" Margin="7,0,0,0">
+                <DockPanel>
+                    <Button DockPanel.Dock="Bottom" Content="Открыть файл…" HorizontalAlignment="Left"
+                            Margin="0,10,0,0" Click="OpenSecondFileButton_Click" />
+                    <TextBox x:Name="SecondInputTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas" SpellCheck.IsEnabled="False"
+                             AutomationProperties.Name="XML второй матрицы" TextChanged="InputTextBox_TextChanged" />
+                </DockPanel>
+            </GroupBox>
+        </Grid>
+
+        <Button Grid.Row="2" Content="Сравнить матрицы" Style="{StaticResource PrimaryButtonStyle}"
+                HorizontalAlignment="Left" Margin="0,14,0,0" Click="CompareButton_Click" />
+
+        <TextBlock x:Name="ComparisonStatusTextBlock" Grid.Row="3" Margin="0,12,0,12"
+                   Foreground="#4B5563" TextWrapping="Wrap" Text="Введите или загрузите две матрицы для сравнения." />
+
+        <DataGrid x:Name="DifferencesDataGrid" Grid.Row="4" Visibility="Collapsed" IsReadOnly="True"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                  CanUserReorderColumns="False" HeadersVisibility="Column" RowHeaderWidth="0"
+                  SelectionUnit="Cell" GridLinesVisibility="Horizontal" MinColumnWidth="100"
+                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                  AutomationProperties.Name="Отличия матриц">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Параметр" Binding="{Binding ParameterName}" Width="100" />
+                <DataGridTextColumn Header="Первая матрица" Binding="{Binding FirstValue, StringFormat={}{0:R}}" Width="*" />
+                <DataGridTextColumn Header="Вторая матрица" Binding="{Binding SecondValue, StringFormat={}{0:R}}" Width="*" />
+                <DataGridTextColumn Header="Разность (вторая − первая)"
+                                    Binding="{Binding Difference, StringFormat={}{0:R}, TargetNullValue='Разность слишком велика'}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
