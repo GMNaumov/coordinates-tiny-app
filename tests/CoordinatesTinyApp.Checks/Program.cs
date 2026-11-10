@@ -28,7 +28,13 @@ internal static class Program
             DatabaseSettingsChecks.CorruptSettingsAreRejected,
             DatabaseSettingsChecks.ConnectionParametersAreValidatedAndEscaped,
             DatabaseSettingsChecks.SelectedPlacementMustBeValid,
-            DatabaseSettingsChecks.ErrorsDoNotExposeConnectionSecrets
+            DatabaseSettingsChecks.ErrorsDoNotExposeConnectionSecrets,
+            ViewModelChecks.EditorPreservesLoadApplyAndResetBehavior,
+            ViewModelChecks.EditorValidatesNumbersAndRequestsFocus,
+            ViewModelChecks.EditorSaveAndCancellationPreserveCommitBoundary,
+            ViewModelChecks.ComparisonInvalidatesResultsAndIdentifiesInputErrors,
+            ViewModelChecks.FileAndDatabaseInputsRemainIndependent,
+            ViewModelChecks.SettingsValidationAndRecoveryRemainAvailable
         };
 
         if (OperatingSystem.IsWindows())
@@ -55,6 +61,16 @@ internal static class Program
         }
 
         Console.WriteLine($"All {checks.Length} checks passed.");
+
+        try
+        {
+            await ViewModelChecks.RunAsync();
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine($"FAIL ViewModel async checks: {exception}");
+            return 1;
+        }
 
         if (args.Contains("--postgres-fixture", StringComparer.Ordinal))
         {

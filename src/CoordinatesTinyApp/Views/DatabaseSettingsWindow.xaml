@@ -12,7 +12,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock Text="Подключение к PostgreSQL" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16" />
-        <Grid x:Name="FieldsGrid" Grid.Row="1">
+        <Grid IsEnabled="{Binding IsIdle}" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="130" />
                 <ColumnDefinition Width="*" />
@@ -25,25 +25,25 @@
                 <RowDefinition Height="44" />
             </Grid.RowDefinitions>
             <Label Content="Сервер" Target="{Binding ElementName=ServerTextBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="ServerTextBox" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
+            <TextBox x:Name="ServerTextBox" Text="{Binding Server, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
             <Label Grid.Row="1" Content="Порт" Target="{Binding ElementName=PortTextBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="PortTextBox" Grid.Row="1" Grid.Column="1" Padding="6" Margin="0,4" MaxLength="5" VerticalContentAlignment="Center" />
+            <TextBox x:Name="PortTextBox" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Padding="6" Margin="0,4" MaxLength="5" VerticalContentAlignment="Center" />
             <Label Grid.Row="2" Content="База данных" Target="{Binding ElementName=DatabaseTextBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="DatabaseTextBox" Grid.Row="2" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
+            <TextBox x:Name="DatabaseTextBox" Text="{Binding DatabaseName, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
             <Label Grid.Row="3" Content="Логин" Target="{Binding ElementName=UsernameTextBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="UsernameTextBox" Grid.Row="3" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
+            <TextBox x:Name="UsernameTextBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
             <Label Grid.Row="4" Content="Пароль" Target="{Binding ElementName=DatabasePasswordBox}" VerticalAlignment="Center" />
-            <PasswordBox x:Name="DatabasePasswordBox" Grid.Row="4" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
+            <PasswordBox x:Name="DatabasePasswordBox" PasswordChanged="PasswordBox_PasswordChanged" Grid.Row="4" Grid.Column="1" Padding="6" Margin="0,4" VerticalContentAlignment="Center" />
         </Grid>
         <StackPanel Grid.Row="2" Margin="0,14,0,12">
             <TextBlock Text="Пароль шифруется средствами Windows для текущей учётной записи. После переноса настроек на другой компьютер или к другому пользователю введите пароль заново."
                        Foreground="#4B5563" TextWrapping="Wrap" />
-            <TextBlock x:Name="SettingsPathTextBlock" Margin="0,8,0,0" FontSize="12" Foreground="#4B5563" TextWrapping="Wrap" />
-            <TextBlock x:Name="StatusTextBlock" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="#4B5563" AutomationProperties.LiveSetting="Polite" />
+            <TextBlock Text="{Binding SettingsPath}" Margin="0,8,0,0" FontSize="12" Foreground="#4B5563" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding StatusMessage}" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="{Binding StatusColor}" AutomationProperties.LiveSetting="Polite" />
         </StackPanel>
         <WrapPanel Grid.Row="3" HorizontalAlignment="Right">
-            <Button x:Name="TestButton" Content="Проверить подключение" Click="TestButton_Click" />
-            <Button x:Name="SaveButton" Content="Сохранить" Style="{StaticResource PrimaryButtonStyle}" Click="SaveButton_Click" />
+            <Button x:Name="TestButton" Content="Проверить подключение" Command="{Binding TestConnectionCommand}" />
+            <Button x:Name="SaveButton" Content="Сохранить" Style="{StaticResource PrimaryButtonStyle}" Command="{Binding SaveCommand}" />
             <Button Content="Отмена" IsCancel="True" />
         </WrapPanel>
     </Grid>

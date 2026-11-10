@@ -8,12 +8,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{06C13D09
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinatesTinyApp.Checks", "tests\CoordinatesTinyApp.Checks\CoordinatesTinyApp.Checks.csproj", "{F0653343-A81E-441C-891E-BC0F3589A826}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinatesTinyApp.WpfChecks", "tests\CoordinatesTinyApp.WpfChecks\CoordinatesTinyApp.WpfChecks.csproj", "{A2734112-836C-44A1-BE25-56CB7278421C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2734112-836C-44A1-BE25-56CB7278421C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2734112-836C-44A1-BE25-56CB7278421C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2734112-836C-44A1-BE25-56CB7278421C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2734112-836C-44A1-BE25-56CB7278421C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4B4B889-47C2-4E8F-9E83-913432E18C12}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +33,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{A2734112-836C-44A1-BE25-56CB7278421C} = {06C13D09-ABD5-4141-AE69-D9E513259612}
 		{F0653343-A81E-441C-891E-BC0F3589A826} = {06C13D09-ABD5-4141-AE69-D9E513259612}
 	EndGlobalSection
 EndGlobal

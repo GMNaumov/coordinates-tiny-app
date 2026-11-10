@@ -1,6 +1,6 @@
 <UserControl x:Class="CoordinatesTinyApp.Views.MatrixComparisonView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" DataContextChanged="View_DataContextChanged">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -27,37 +27,37 @@
             <GroupBox Header="Первая матрица" Padding="12" Margin="0,0,7,0">
                 <DockPanel>
                     <WrapPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
-                        <Button Content="Открыть файл…" Click="OpenFirstFileButton_Click" />
-                        <Button Content="Из БД…" Click="OpenFirstDatabaseButton_Click" />
+                        <Button Content="Открыть файл…" Command="{Binding OpenFirstFileCommand}" />
+                        <Button Content="Из БД…" Command="{Binding OpenFirstDatabaseCommand}" />
                     </WrapPanel>
-                    <TextBox x:Name="FirstInputTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                    <TextBox x:Name="FirstInputTextBox" Text="{Binding FirstInputXml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="NoWrap"
                              HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                              FontFamily="Consolas" SpellCheck.IsEnabled="False"
-                             AutomationProperties.Name="XML первой матрицы" TextChanged="InputTextBox_TextChanged" />
+                             AutomationProperties.Name="XML первой матрицы" />
                 </DockPanel>
             </GroupBox>
 
             <GroupBox Grid.Column="1" Header="Вторая матрица" Padding="12" Margin="7,0,0,0">
                 <DockPanel>
                     <WrapPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
-                        <Button Content="Открыть файл…" Click="OpenSecondFileButton_Click" />
-                        <Button Content="Из БД…" Click="OpenSecondDatabaseButton_Click" />
+                        <Button Content="Открыть файл…" Command="{Binding OpenSecondFileCommand}" />
+                        <Button Content="Из БД…" Command="{Binding OpenSecondDatabaseCommand}" />
                     </WrapPanel>
-                    <TextBox x:Name="SecondInputTextBox" AcceptsReturn="True" TextWrapping="NoWrap"
+                    <TextBox x:Name="SecondInputTextBox" Text="{Binding SecondInputXml, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="NoWrap"
                              HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                              FontFamily="Consolas" SpellCheck.IsEnabled="False"
-                             AutomationProperties.Name="XML второй матрицы" TextChanged="InputTextBox_TextChanged" />
+                             AutomationProperties.Name="XML второй матрицы" />
                 </DockPanel>
             </GroupBox>
         </Grid>
 
         <Button Grid.Row="2" Content="Сравнить матрицы" Style="{StaticResource PrimaryButtonStyle}"
-                HorizontalAlignment="Left" Margin="0,14,0,0" Click="CompareButton_Click" />
+                HorizontalAlignment="Left" Margin="0,14,0,0" Command="{Binding CompareCommand}" />
 
         <TextBlock x:Name="ComparisonStatusTextBlock" Grid.Row="3" Margin="0,12,0,12"
-                   Foreground="#4B5563" TextWrapping="Wrap" Text="Введите или загрузите две матрицы для сравнения." />
+                   Foreground="{Binding StatusColor}" TextWrapping="Wrap" Text="{Binding StatusMessage}" />
 
-        <DataGrid x:Name="DifferencesDataGrid" Grid.Row="4" Visibility="Collapsed" IsReadOnly="True"
+        <DataGrid x:Name="DifferencesDataGrid" Grid.Row="4" ItemsSource="{Binding Differences}" Visibility="{Binding HasDifferences, Converter={StaticResource BooleanToVisibilityConverter}}" IsReadOnly="True"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                   CanUserReorderColumns="False" HeadersVisibility="Column" RowHeaderWidth="0"
                   SelectionUnit="Cell" GridLinesVisibility="Horizontal" MinColumnWidth="100"

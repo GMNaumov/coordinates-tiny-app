@@ -12,23 +12,23 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <DockPanel Margin="0,0,0,12">
-            <Button x:Name="SettingsButton" DockPanel.Dock="Right" Content="Настройки подключения…" Click="SettingsButton_Click" />
+            <Button x:Name="SettingsButton" DockPanel.Dock="Right" Content="Настройки подключения…" Command="{Binding SettingsCommand}" />
             <StackPanel>
                 <TextBlock Text="Координаты из PostgreSQL" FontSize="22" FontWeight="SemiBold" />
-                <TextBlock x:Name="ConnectionTextBlock" Margin="0,4,0,0" Foreground="#4B5563" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding ConnectionText}" Margin="0,4,0,0" Foreground="#4B5563" TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>
-        <DockPanel x:Name="SearchPanel" Grid.Row="1" Margin="0,0,0,12">
-            <Button DockPanel.Dock="Right" Content="Найти / обновить" Margin="8,0,0,0" Click="SearchButton_Click" />
+        <DockPanel IsEnabled="{Binding IsIdle}" Grid.Row="1" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Right" Content="Найти / обновить" Margin="8,0,0,0" Command="{Binding SearchCommand}" />
             <Label DockPanel.Dock="Left" Content="ID объекта или GUID:" Target="{Binding ElementName=SearchTextBox}" VerticalAlignment="Center" />
-            <TextBox x:Name="SearchTextBox" Padding="6" VerticalContentAlignment="Center" MaxLength="64"
+            <TextBox x:Name="SearchTextBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Padding="6" VerticalContentAlignment="Center" MaxLength="64"
                      ToolTip="Пустое поле — все записи. Для применения поиска нажмите «Найти / обновить»." />
         </DockPanel>
-        <DataGrid x:Name="RecordsDataGrid" Grid.Row="2" IsReadOnly="True" AutoGenerateColumns="False"
+        <DataGrid x:Name="RecordsDataGrid" ItemsSource="{Binding Records}" SelectedItem="{Binding SelectedRecord}" IsEnabled="{Binding IsIdle}" Grid.Row="2" IsReadOnly="True" AutoGenerateColumns="False"
                   CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False"
                   SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column"
                   HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                  SelectionChanged="RecordsDataGrid_SelectionChanged" MouseDoubleClick="RecordsDataGrid_MouseDoubleClick"
+                  MouseDoubleClick="RecordsDataGrid_MouseDoubleClick"
                   AutomationProperties.Name="Записи координат">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID объекта справочника" Binding="{Binding ObjectId}" Width="190" />
@@ -36,18 +36,18 @@
                 <DataGridTextColumn Header="Матрица трансформации" Binding="{Binding PlacementDisplay}" Width="*" MinWidth="300" />
             </DataGrid.Columns>
         </DataGrid>
-        <TextBlock x:Name="StatusTextBlock" Grid.Row="3" Margin="0,12" TextWrapping="Wrap" Foreground="#4B5563"
+        <TextBlock Text="{Binding StatusMessage}" Grid.Row="3" Margin="0,12" TextWrapping="Wrap" Foreground="{Binding StatusColor}"
                    AutomationProperties.LiveSetting="Polite" />
         <DockPanel Grid.Row="4">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="SelectButton" Content="Загрузить матрицу" IsEnabled="False"
-                        Style="{StaticResource PrimaryButtonStyle}" Click="SelectButton_Click" />
+                <Button x:Name="SelectButton" Content="Загрузить матрицу"
+                        Style="{StaticResource PrimaryButtonStyle}" Command="{Binding SelectCommand}" />
                 <Button Content="Отмена" IsCancel="True" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="PreviousButton" Content="Назад" IsEnabled="False" Click="PreviousButton_Click" />
-                <TextBlock x:Name="PageTextBlock" VerticalAlignment="Center" Margin="4,0,12,0" />
-                <Button x:Name="NextButton" Content="Далее" IsEnabled="False" Click="NextButton_Click" />
+                <Button x:Name="PreviousButton" Content="Назад" Command="{Binding PreviousCommand}" />
+                <TextBlock Text="{Binding PageText}" VerticalAlignment="Center" Margin="4,0,12,0" />
+                <Button x:Name="NextButton" Content="Далее" Command="{Binding NextCommand}" />
             </StackPanel>
         </DockPanel>
     </Grid>

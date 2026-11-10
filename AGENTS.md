@@ -15,6 +15,7 @@
 - Целевые ОС: Windows 10 и Windows 11. Поддержка Linux не требуется.
 - Платформа: .NET 8 LTS, целевой монiker `net8.0-windows`.
 - UI: WPF.
+- Архитектура интерфейса: MVVM без стороннего MVVM-фреймворка. Состояние и команды находятся в `ViewModels`, XAML использует привязки; code-behind отвечает только за специфичные для WPF действия и связывание компонентов.
 - Использовать преимущественно стандартные библиотеки .NET. Third-party компоненты не применять; популярные NuGet-пакеты допустимы только при реальной необходимости.
 - Локальный .NET SDK не установлен. Для восстановления пакетов, сборки и других команд .NET использовать Docker Desktop и образ `mcr.microsoft.com/dotnet/sdk:8.0`.
 - Код структурировать и комментировать основные блоки для поддерживаемости, не добавляя очевидных комментариев.
@@ -54,6 +55,10 @@ src/
     │   └── coordinates.ico
     ├── MainWindow.xaml
     ├── MainWindow.xaml.cs
+    ├── Infrastructure/
+    │   ├── AsyncRelayCommand.cs
+    │   ├── ObservableObject.cs
+    │   └── RelayCommand.cs
     ├── Models/
     │   ├── CoordinateRecord.cs
     │   ├── DatabaseConnectionSettings.cs
@@ -62,25 +67,43 @@ src/
     ├── Services/
     │   ├── DatabaseErrorMessages.cs
     │   ├── DatabaseSettingsStore.cs
+    │   ├── ICoordinateDatabase.cs
+    │   ├── IDatabaseSettingsStore.cs
     │   ├── IPasswordProtector.cs
+    │   ├── IUserDialogService.cs
+    │   ├── PostgresCoordinateDatabase.cs
     │   ├── PostgresCoordinateReader.cs
     │   ├── TransformationMapComparer.cs
     │   ├── TransformationMapFileReader.cs
     │   ├── TransformationMapXmlSerializer.cs
     │   └── WindowsPasswordProtector.cs
+    ├── ViewModels/
+    │   ├── DatabaseRecordPickerViewModel.cs
+    │   ├── DatabaseSettingsViewModel.cs
+    │   ├── MainWindowViewModel.cs
+    │   ├── MatrixCellViewModel.cs
+    │   ├── MatrixComparisonViewModel.cs
+    │   ├── MatrixEditorViewModel.cs
+    │   └── StatusViewModel.cs
     └── Views/
-        ├── DatabaseDialogs.cs
         ├── DatabaseRecordPickerWindow.xaml
         ├── DatabaseRecordPickerWindow.xaml.cs
         ├── DatabaseSettingsWindow.xaml
         ├── DatabaseSettingsWindow.xaml.cs
+        ├── MatrixEditorView.xaml
+        ├── MatrixEditorView.xaml.cs
         ├── MatrixComparisonView.xaml
-        └── MatrixComparisonView.xaml.cs
+        ├── MatrixComparisonView.xaml.cs
+        └── WindowDialogService.cs
 tests/
 ├── CoordinatesTinyApp.Checks/
 │   ├── CoordinatesTinyApp.Checks.csproj
 │   ├── DatabaseSettingsChecks.cs
 │   ├── PostgresIntegrationChecks.cs
+│   ├── Program.cs
+│   └── ViewModelChecks.cs
+├── CoordinatesTinyApp.WpfChecks/
+│   ├── CoordinatesTinyApp.WpfChecks.csproj
 │   └── Program.cs
 └── Invoke-PostgresChecks.ps1
 ```
@@ -88,15 +111,18 @@ tests/
 - `CoordinatesTinyApp.csproj` содержит базовые настройки WPF, nullable reference types, implicit usings и `EnableWindowsTargeting` для сборки в Linux-контейнере. Зависимости: Npgsql и официальный пакет DPAPI; ORM и сторонних UI-компонентов нет.
 - `Assets/coordinates.ico` является многоразмерной иконкой исполняемого файла и главного окна; исходный SVG после преобразования удалён.
 - `App` является стандартной точкой входа WPF и содержит общие стили интерфейса обеих вкладок.
-- `MainWindow` содержит вкладки редактора и сравнения, интерфейс загрузки, редактирования и сохранения матрицы, а также обработчики файловых операций редактора.
+- `MainWindow` содержит вкладки редактора и сравнения. `MainWindowViewModel` создаёт независимые ViewModel обеих вкладок и команду настроек. `MatrixEditorView` содержит XAML редактора, `MatrixEditorViewModel` — загрузку, редактирование, применение/сброс и сохранение; `MatrixCellViewModel` хранит текст отдельной ячейки. Смещения показывают последнюю загруженную/применённую/сохранённую матрицу, как и до рефакторинга.
+- `ObservableObject` реализует уведомления свойств; `RelayCommand` и `AsyncRelayCommand` реализуют `ICommand` без зависимости от WPF. Асинхронная команда запрещает повторный запуск до завершения; ожидаемые ошибки обрабатывает ViewModel. `StatusViewModel` предоставляет текст и цвет строки состояния.
 - `TransformationMap` хранит независимую копию значений матрицы и предоставляет смещение X/Y/Z.
 - `TransformationMapDifference` хранит имя отличающегося параметра, оба значения и разность; `null` в разности означает переполнение `double`.
 - `TransformationMapComparer` сравнивает все элементы двух матриц и возвращает отличия в порядке строк матрицы.
 - `TransformationMapFileReader` обеспечивает общую проверку расширения и размера загружаемых файлов обеих вкладок.
 - `TransformationMapXmlSerializer` отвечает за строгий безопасный разбор и сериализацию XML.
-- `MatrixComparisonView` содержит интерфейс и обработчики вкладки сравнения; её входные данные и результат независимы от редактора.
-- `DatabaseSettingsStore` отделяет JSON и атомарную замену файла от шифрования через `IPasswordProtector`; рабочая реализация `WindowsPasswordProtector` использует DPAPI. `PostgresCoordinateReader` формирует строку подключения через NpgsqlConnectionStringBuilder и выполняет параметризованные запросы с ограничением выборки. `DatabaseErrorMessages` возвращает сообщения без секретов. `DatabaseDialogs` предоставляет общий вход в диалоги обеим вкладкам.
-- `CoordinatesTinyApp.Checks` — консольный проект проверок на `net8.0`, включённый в решение; использует те же пакеты Npgsql и DPAPI. Компилирует исходные файлы моделей и сервисов по ссылке для запуска проверок без WPF. Проверяет сравнение, граничные числовые значения, ограничения XML/файлов, точность сериализации, настройки, валидацию выбора и безопасные сообщения об ошибках. Реальное шифрование DPAPI проверяется только на Windows, на Linux этот пункт явно пропускается. Опциональный режим `--postgres-fixture` создаёт тестовые схему/таблицу/роль только в пустой одноразовой БД `coordinates_checks`; не запускать его на рабочей БД.
+- `MatrixComparisonView` содержит интерфейс сравнения; `MatrixComparisonViewModel` управляет входными данными, загрузкой, проверками и результатом. Представления редактора и сравнения обрабатывают только запросы фокуса при ошибках.
+- `DatabaseSettingsStore` реализует `IDatabaseSettingsStore` и отделяет JSON и атомарную замену файла от шифрования через `IPasswordProtector`; рабочая реализация `WindowsPasswordProtector` использует DPAPI. Windows-метод `CreateDefault` создаёт хранилище по стандартному пути. `PostgresCoordinateReader` формирует строку подключения через NpgsqlConnectionStringBuilder и выполняет параметризованные запросы с ограничением выборки. `PostgresCoordinateDatabase` предоставляет эти операции ViewModel через `ICoordinateDatabase`. `DatabaseErrorMessages` возвращает сообщения без секретов.
+- `IUserDialogService` отделяет выбор файлов, запись из БД, настройки и предупреждения от ViewModel; `WindowDialogService` реализует его через стандартные WPF-диалоги с владельцем окна. `DatabaseSettingsViewModel` и `DatabaseRecordPickerViewModel` управляют валидацией, асинхронными операциями, отменой, поиском и страницами. Code-behind диалогов связывает жизненный цикл окна с ViewModel, передаёт пароль из `PasswordBox` без dependency property и проверяет, что двойной щелчок пришёлся на строку таблицы.
+- `CoordinatesTinyApp.Checks` — консольный проект проверок на `net8.0`, включённый в решение; использует те же пакеты Npgsql и DPAPI. Компилирует исходные файлы моделей, сервисов, инфраструктуры и ViewModel по ссылке для запуска проверок без WPF. Проверяет сравнение, граничные числовые значения, ограничения XML/файлов, точность сериализации, настройки, валидацию выбора и безопасные сообщения об ошибках. `ViewModelChecks` дополнительно проверяет команды, уведомления, применение/сброс, культуру чисел, отмену и ошибки сохранения, независимость вкладок, поиск/страницы, блокировку операций и отмену запросов при закрытии, включая поздние результаты. Реальное шифрование DPAPI проверяется только на Windows, на Linux этот пункт явно пропускается. Опциональный режим `--postgres-fixture` создаёт тестовые схему/таблицу/роль только в пустой одноразовой БД `coordinates_checks`; не запускать его на рабочей БД.
+- `CoordinatesTinyApp.WpfChecks` — отдельный консольный проект на `net8.0-windows`, включённый в решение. На Windows в STA-потоке загружает настоящие XAML и общие ресурсы, проверяет привязки обеих вкладок, 16 ячеек, смещений, настроек/PasswordBox и выбора записи, а также отсутствие ошибок WPF Binding. Окна не показываются, рабочие настройки не сохраняются, запросы к БД заменены заглушками. Сборка возможна в Linux-контейнере, запуск — только на Windows. Доступ к внутренним типам приложения предоставлен только этой тестовой сборке через `InternalsVisibleTo`.
 - `Invoke-PostgresChecks.ps1` создаёт отдельные контейнер PostgreSQL 17 и Docker-сеть без публикации порта, собирает решение, запускает проверки на синтетических данных и удаляет контейнер и сеть. Проверяет подключение без таблицы, чтение с правами SELECT, страницы/поиск, NULL, неверный XML, ограничения размера, неверный пароль и отмену.
 - API, запись в PostgreSQL и другие предметные функции не реализованы.
 
@@ -130,6 +156,13 @@ docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet
 ```
 
 Результаты в `artifacts/` исключены из Git. Доступа к рабочей БД пока нет: проверки временной таблицы не подтверждают фактическую структуру и права на сервере пользователя.
+
+Проверка XAML-привязок на Windows без установленного .NET (сначала дождаться завершения публикации):
+
+```powershell
+docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet publish tests/CoordinatesTinyApp.WpfChecks --configuration Release --runtime win-x64 --self-contained true --output /src/artifacts/wpf-checks
+./artifacts/wpf-checks/CoordinatesTinyApp.WpfChecks.exe
+```
 
 ## Правила дальнейшей работы
 

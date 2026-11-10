@@ -1,10 +1,11 @@
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using CoordinatesTinyApp.Models;
 
 namespace CoordinatesTinyApp.Services;
 
-internal sealed class DatabaseSettingsStore
+internal sealed class DatabaseSettingsStore : IDatabaseSettingsStore
 {
     private const int MaxFileSize = 64 * 1024;
     private readonly IPasswordProtector _passwordProtector;
@@ -16,6 +17,14 @@ internal sealed class DatabaseSettingsStore
     }
 
     public string FilePath { get; }
+
+    [SupportedOSPlatform("windows")]
+    public static DatabaseSettingsStore CreateDefault()
+    {
+        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "CoordinatesTinyApp", "database-settings.json");
+        return new DatabaseSettingsStore(path, new WindowsPasswordProtector());
+    }
 
     public DatabaseConnectionSettings? Load()
     {

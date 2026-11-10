@@ -1,0 +1,145 @@
+<UserControl x:Class="CoordinatesTinyApp.Views.MatrixEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             DataContextChanged="View_DataContextChanged">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Координаты объектов" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock Text="Загрузите одну матрицу преобразования, измените её значения и сохраните результат в XML."
+                       Margin="0,5,0,0"
+                       Foreground="#4B5563"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <GroupBox Grid.Row="1" Header="1. Исходные данные" Padding="12" Margin="0,0,0,14">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="105" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Вставьте XML-блок TransformationMap, откройте файл .txt/.xml или выберите запись из PostgreSQL:"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,7" />
+                <TextBox x:Name="InputTextBox" Text="{Binding InputXml, UpdateSourceTrigger=PropertyChanged}"
+                         Grid.Row="1"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         HorizontalScrollBarVisibility="Auto"
+                         VerticalScrollBarVisibility="Auto"
+                         FontFamily="Consolas"
+                         SpellCheck.IsEnabled="False" />
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button Content="Загрузить строку"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Command="{Binding LoadStringCommand}" />
+                    <Button Content="Открыть файл…" Command="{Binding OpenFileCommand}" />
+                    <Button Content="Загрузить из БД…" Command="{Binding OpenDatabaseCommand}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox x:Name="EditorGroupBox"
+                  Grid.Row="2"
+                  Header="2. Просмотр и редактирование"
+                  Padding="12"
+                  IsEnabled="{Binding IsEditorEnabled}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Text="Матрица преобразования 4 × 4" />
+                    <TextBlock Margin="0,4,0,8"
+                               Foreground="#4B5563"
+                               TextWrapping="Wrap"
+                               Text="m11–m33 — поворот и масштаб; m41–m43 — смещение; остальные элементы задают однородное преобразование." />
+
+                    <Border BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            Background="#FAFAFA"
+                            Padding="8"
+                            HorizontalAlignment="Left">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="32" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column="1" Text="1" HorizontalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Column="2" Text="2" HorizontalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Column="3" Text="3" HorizontalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Column="4" Text="4" HorizontalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Row="1" Text="1" VerticalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Row="2" Text="2" VerticalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Row="3" Text="3" VerticalAlignment="Center" Foreground="#6B7280" />
+                            <TextBlock Grid.Row="4" Text="4" VerticalAlignment="Center" Foreground="#6B7280" />
+
+                            <TextBox x:Name="M11TextBox" Text="{Binding Cells[0].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m11" />
+                            <TextBox x:Name="M12TextBox" Text="{Binding Cells[1].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m12" />
+                            <TextBox x:Name="M13TextBox" Text="{Binding Cells[2].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m13" />
+                            <TextBox x:Name="M14TextBox" Text="{Binding Cells[3].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m14" />
+                            <TextBox x:Name="M21TextBox" Text="{Binding Cells[4].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m21" />
+                            <TextBox x:Name="M22TextBox" Text="{Binding Cells[5].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m22" />
+                            <TextBox x:Name="M23TextBox" Text="{Binding Cells[6].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m23" />
+                            <TextBox x:Name="M24TextBox" Text="{Binding Cells[7].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m24" />
+                            <TextBox x:Name="M31TextBox" Text="{Binding Cells[8].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m31" />
+                            <TextBox x:Name="M32TextBox" Text="{Binding Cells[9].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m32" />
+                            <TextBox x:Name="M33TextBox" Text="{Binding Cells[10].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m33" />
+                            <TextBox x:Name="M34TextBox" Text="{Binding Cells[11].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m34" />
+                            <TextBox x:Name="M41TextBox" Text="{Binding Cells[12].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m41" />
+                            <TextBox x:Name="M42TextBox" Text="{Binding Cells[13].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m42" />
+                            <TextBox x:Name="M43TextBox" Text="{Binding Cells[14].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m43" />
+                            <TextBox x:Name="M44TextBox" Text="{Binding Cells[15].Text, UpdateSourceTrigger=PropertyChanged}" Grid.Row="4" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m44" />
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="Смещение объекта" FontWeight="SemiBold" Margin="0,14,0,7" />
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="X (m41)" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding TranslationX, Mode=OneWay}" Style="{StaticResource TranslationCellStyle}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="Y (m42)" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding TranslationY, Mode=OneWay}" Style="{StaticResource TranslationCellStyle}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Z (m43)" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding TranslationZ, Mode=OneWay}" Style="{StaticResource TranslationCellStyle}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                        <Button Content="Применить изменения" Command="{Binding ApplyChangesCommand}" />
+                        <Button Content="Сбросить изменения" Command="{Binding ResetChangesCommand}" />
+                        <Button Content="Сохранить в XML…"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding SaveFileCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </GroupBox>
+
+        <TextBlock x:Name="StatusTextBlock"
+                   Grid.Row="3"
+                   Margin="0,12,0,0"
+                   Foreground="{Binding StatusColor}"
+                   TextWrapping="Wrap"
+                   Text="{Binding StatusMessage}" />
+    </Grid>
+</UserControl>
