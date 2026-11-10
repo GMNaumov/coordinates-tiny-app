@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Resource Include="Assets\coordinates.ico" />
+    <PackageReference Include="Npgsql" Version="8.0.9" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

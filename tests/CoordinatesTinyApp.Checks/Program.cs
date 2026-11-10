@@ -7,7 +7,7 @@ namespace CoordinatesTinyApp.Checks;
 
 internal static class Program
 {
-    private static int Main()
+    private static async Task<int> Main(string[] args)
     {
         Action[] checks =
         {
@@ -22,8 +22,23 @@ internal static class Program
             InvalidXmlIsRejected,
             FileRestrictionsArePreserved,
             SerializationPreservesValues,
-            NullMatricesAreRejected
+            NullMatricesAreRejected,
+            DatabaseSettingsChecks.SettingsAreStoredWithoutPlaintextPassword,
+            DatabaseSettingsChecks.FailedSavePreservesPreviousSettings,
+            DatabaseSettingsChecks.CorruptSettingsAreRejected,
+            DatabaseSettingsChecks.ConnectionParametersAreValidatedAndEscaped,
+            DatabaseSettingsChecks.SelectedPlacementMustBeValid,
+            DatabaseSettingsChecks.ErrorsDoNotExposeConnectionSecrets
         };
+
+        if (OperatingSystem.IsWindows())
+        {
+            checks = checks.Append(DatabaseSettingsChecks.WindowsPasswordEncryptionRoundTrips).ToArray();
+        }
+        else
+        {
+            Console.WriteLine("SKIP WindowsPasswordEncryptionRoundTrips: DPAPI requires Windows.");
+        }
 
         foreach (var check in checks)
         {
@@ -40,6 +55,21 @@ internal static class Program
         }
 
         Console.WriteLine($"All {checks.Length} checks passed.");
+
+        if (args.Contains("--postgres-fixture", StringComparer.Ordinal))
+        {
+            try
+            {
+                await PostgresIntegrationChecks.RunAsync();
+                Console.WriteLine("PASS PostgreSQL integration checks (disposable fixture)");
+            }
+            catch (Exception exception)
+            {
+                Console.Error.WriteLine($"FAIL PostgreSQL integration checks: {exception}");
+                return 1;
+            }
+        }
+
         return 0;
     }
 
@@ -190,7 +220,7 @@ internal static class Program
         ExpectException<ArgumentNullException>(() => TransformationMapComparer.Compare(map, null!));
     }
 
-    private static string CreateXml(string value)
+    internal static string CreateXml(string value)
     {
         var xml = new StringBuilder("<TransformationMap ");
 
@@ -203,13 +233,13 @@ internal static class Program
         return xml.Append("/>").ToString();
     }
 
-    private static void Require(bool condition, string message)
+    internal static void Require(bool condition, string message)
     {
         if (!condition)
             throw new InvalidOperationException(message);
     }
 
-    private static void ExpectException<TException>(Action action) where TException : Exception
+    internal static void ExpectException<TException>(Action action) where TException : Exception
     {
         try
         {

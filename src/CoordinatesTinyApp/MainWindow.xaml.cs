@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using CoordinatesTinyApp.Models;
 using CoordinatesTinyApp.Services;
+using CoordinatesTinyApp.Views;
 using Microsoft.Win32;
 
 namespace CoordinatesTinyApp;
@@ -65,6 +66,22 @@ public partial class MainWindow : Window
         {
             ShowError($"Нет доступа к файлу: {exception.Message}");
         }
+    }
+
+    private void DatabaseSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        DatabaseDialogs.ShowSettings(this);
+    }
+
+    private void OpenDatabaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        string? xml = DatabaseDialogs.SelectPlacement(this);
+
+        if (xml is null)
+            return;
+
+        InputTextBox.Text = xml;
+        LoadMap(xml);
     }
 
     private void ApplyChangesButton_Click(object sender, RoutedEventArgs e)

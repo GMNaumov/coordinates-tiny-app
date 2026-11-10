@@ -20,7 +20,7 @@
 - Код структурировать и комментировать основные блоки для поддерживаемости, не добавляя очевидных комментариев.
 - Стандарт кодирования: `naming-conventions.md`. Обязательно перечитывать его при необходимости и соблюдать во всех новых и изменяемых файлах.
 - Поддержка запуска без предустановленного .NET Runtime (self-contained публикация) будет настроена на этапе реализации публикации, если это потребуется.
-- API и взаимодействие с базой данных пока не требуются.
+- API и запись в базу данных пока не требуются. Поддерживается чтение координат из PostgreSQL через Npgsql 8.0.9 (совместим с .NET 8); для DPAPI используется официальный пакет System.Security.Cryptography.ProtectedData 8.0.0.
 
 ## Реализованная функциональность
 
@@ -36,6 +36,10 @@
 - На отдельной вкладке «Сравнение матриц» можно вставить два блока `TransformationMap` или загрузить каждый из файла `.txt`/`.xml` до 64 КБ с теми же правилами проверки XML.
 - Сравнение выполняется по всем 16 значениям `double` точно, без допуска; различия в записи чисел и знаке нуля не учитываются. Результат — сообщение об идентичности либо таблица отличающихся параметров с первым, вторым значениями и разностью «вторая − первая». Числа в таблице отображаются в round-trip формате; переполнение разности обозначается явно.
 - При изменении любого исходного блока результат сравнения сбрасывается. Ошибки сравнения отображаются на той же вкладке с указанием первой или второй матрицы.
+- В редакторе и для каждого входа сравнения доступна загрузка из PostgreSQL. Приложение читает `dbo."Coordinates"`, поля `"s_ObjectID"` (integer), `"s_Guid"` (uuid), `"Placement"` (text); регистр имён сохраняется кавычками SQL. Запросы приложения только читают данные.
+- Окно выбора показывает колонки «ID объекта справочника», «GUID объекта», «Матрица трансформации», поддерживает страницы по 100 записей и точный поиск по ID либо GUID. Для применения поиска нужно нажать «Найти / обновить»; пустой поиск показывает все записи. NULL и некорректный XML не загружаются; размер Placement ограничен 64 КБ в UTF-8 на сервере до передачи клиенту, выбранный XML проверяется общим сериализатором.
+- Общие настройки PostgreSQL (сервер, порт, база, логин, пароль) доступны через кнопку над вкладками и из окна выбора. Хранятся в `%LOCALAPPDATA%\CoordinatesTinyApp\database-settings.json`, запись заменяет файл после полного сохранения. Пароль сохраняется только как DPAPI CurrentUser ciphertext в Base64, без ключа в приложении; для другого пользователя Windows/компьютера нужно повторно ввести настройки. Повреждённый файл или ошибка расшифровки отображаются пользователю; повторное сохранение позволяет заменить настройки.
+- Проверка подключения выполняет `SELECT 1` и не требует наличия таблицы. Сохранение настроек не требует доступного сервера. Подключение и загрузка асинхронны; тайм-аут подключения 10 секунд, команды 15 секунд, общий срок операции 30 секунд; закрытие диалога отменяет запрос. Строки подключения и исходные сообщения сервера не выводятся пользователю. Используется стандартный для Npgsql режим SSL Prefer, без отдельной настройки TLS в интерфейсе.
 
 ## Текущая структура
 
@@ -51,22 +55,37 @@ src/
     ├── MainWindow.xaml
     ├── MainWindow.xaml.cs
     ├── Models/
+    │   ├── CoordinateRecord.cs
+    │   ├── DatabaseConnectionSettings.cs
     │   ├── TransformationMap.cs
     │   └── TransformationMapDifference.cs
     ├── Services/
+    │   ├── DatabaseErrorMessages.cs
+    │   ├── DatabaseSettingsStore.cs
+    │   ├── IPasswordProtector.cs
+    │   ├── PostgresCoordinateReader.cs
     │   ├── TransformationMapComparer.cs
     │   ├── TransformationMapFileReader.cs
-    │   └── TransformationMapXmlSerializer.cs
+    │   ├── TransformationMapXmlSerializer.cs
+    │   └── WindowsPasswordProtector.cs
     └── Views/
+        ├── DatabaseDialogs.cs
+        ├── DatabaseRecordPickerWindow.xaml
+        ├── DatabaseRecordPickerWindow.xaml.cs
+        ├── DatabaseSettingsWindow.xaml
+        ├── DatabaseSettingsWindow.xaml.cs
         ├── MatrixComparisonView.xaml
         └── MatrixComparisonView.xaml.cs
 tests/
-└── CoordinatesTinyApp.Checks/
-    ├── CoordinatesTinyApp.Checks.csproj
-    └── Program.cs
+├── CoordinatesTinyApp.Checks/
+│   ├── CoordinatesTinyApp.Checks.csproj
+│   ├── DatabaseSettingsChecks.cs
+│   ├── PostgresIntegrationChecks.cs
+│   └── Program.cs
+└── Invoke-PostgresChecks.ps1
 ```
 
-- `CoordinatesTinyApp.csproj` содержит базовые настройки WPF, nullable reference types, implicit usings и `EnableWindowsTargeting` для сборки в Linux-контейнере. Сторонних зависимостей нет.
+- `CoordinatesTinyApp.csproj` содержит базовые настройки WPF, nullable reference types, implicit usings и `EnableWindowsTargeting` для сборки в Linux-контейнере. Зависимости: Npgsql и официальный пакет DPAPI; ORM и сторонних UI-компонентов нет.
 - `Assets/coordinates.ico` является многоразмерной иконкой исполняемого файла и главного окна; исходный SVG после преобразования удалён.
 - `App` является стандартной точкой входа WPF и содержит общие стили интерфейса обеих вкладок.
 - `MainWindow` содержит вкладки редактора и сравнения, интерфейс загрузки, редактирования и сохранения матрицы, а также обработчики файловых операций редактора.
@@ -76,8 +95,10 @@ tests/
 - `TransformationMapFileReader` обеспечивает общую проверку расширения и размера загружаемых файлов обеих вкладок.
 - `TransformationMapXmlSerializer` отвечает за строгий безопасный разбор и сериализацию XML.
 - `MatrixComparisonView` содержит интерфейс и обработчики вкладки сравнения; её входные данные и результат независимы от редактора.
-- `CoordinatesTinyApp.Checks` — консольный проект проверок на `net8.0` без сторонних пакетов, включённый в решение. Компилирует исходные файлы моделей и сервисов по ссылке для запуска проверок в Linux-контейнере без WPF. Проверяет сравнение, граничные числовые значения, ограничения XML/файлов и сохранение точности сериализации.
-- API, слой хранения в базе данных и другие предметные функции не реализованы.
+- `DatabaseSettingsStore` отделяет JSON и атомарную замену файла от шифрования через `IPasswordProtector`; рабочая реализация `WindowsPasswordProtector` использует DPAPI. `PostgresCoordinateReader` формирует строку подключения через NpgsqlConnectionStringBuilder и выполняет параметризованные запросы с ограничением выборки. `DatabaseErrorMessages` возвращает сообщения без секретов. `DatabaseDialogs` предоставляет общий вход в диалоги обеим вкладкам.
+- `CoordinatesTinyApp.Checks` — консольный проект проверок на `net8.0`, включённый в решение; использует те же пакеты Npgsql и DPAPI. Компилирует исходные файлы моделей и сервисов по ссылке для запуска проверок без WPF. Проверяет сравнение, граничные числовые значения, ограничения XML/файлов, точность сериализации, настройки, валидацию выбора и безопасные сообщения об ошибках. Реальное шифрование DPAPI проверяется только на Windows, на Linux этот пункт явно пропускается. Опциональный режим `--postgres-fixture` создаёт тестовые схему/таблицу/роль только в пустой одноразовой БД `coordinates_checks`; не запускать его на рабочей БД.
+- `Invoke-PostgresChecks.ps1` создаёт отдельные контейнер PostgreSQL 17 и Docker-сеть без публикации порта, собирает решение, запускает проверки на синтетических данных и удаляет контейнер и сеть. Проверяет подключение без таблицы, чтение с правами SELECT, страницы/поиск, NULL, неверный XML, ограничения размера, неверный пароль и отмену.
+- API, запись в PostgreSQL и другие предметные функции не реализованы.
 
 ## Сборка через Docker
 
@@ -94,6 +115,21 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W):/src" -w /src mcr.microsoft.com
 ```
 
 `bin` и `obj` являются артефактами сборки и не должны попадать в Git.
+
+Полная проверка с временным PostgreSQL из PowerShell (Docker Desktop должен быть запущен):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-PostgresChecks.ps1
+```
+
+Для проверки DPAPI без установленного .NET на Windows можно собрать автономные проверки в Docker и запустить их на хосте:
+
+```powershell
+docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 dotnet publish tests/CoordinatesTinyApp.Checks --configuration Release --runtime win-x64 --self-contained true --output /src/artifacts/windows-checks
+./artifacts/windows-checks/CoordinatesTinyApp.Checks.exe
+```
+
+Результаты в `artifacts/` исключены из Git. Доступа к рабочей БД пока нет: проверки временной таблицы не подтверждают фактическую структуру и права на сервере пользователя.
 
 ## Правила дальнейшей работы
 

@@ -1,0 +1,54 @@
+<Window x:Class="CoordinatesTinyApp.Views.DatabaseRecordPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Выбор матрицы из PostgreSQL" Width="1120" Height="650" MinWidth="920" MinHeight="500"
+        WindowStartupLocation="CenterOwner" Loaded="Window_Loaded" Closed="Window_Closed">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,12">
+            <Button x:Name="SettingsButton" DockPanel.Dock="Right" Content="Настройки подключения…" Click="SettingsButton_Click" />
+            <StackPanel>
+                <TextBlock Text="Координаты из PostgreSQL" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock x:Name="ConnectionTextBlock" Margin="0,4,0,0" Foreground="#4B5563" TextWrapping="Wrap" />
+            </StackPanel>
+        </DockPanel>
+        <DockPanel x:Name="SearchPanel" Grid.Row="1" Margin="0,0,0,12">
+            <Button DockPanel.Dock="Right" Content="Найти / обновить" Margin="8,0,0,0" Click="SearchButton_Click" />
+            <Label DockPanel.Dock="Left" Content="ID объекта или GUID:" Target="{Binding ElementName=SearchTextBox}" VerticalAlignment="Center" />
+            <TextBox x:Name="SearchTextBox" Padding="6" VerticalContentAlignment="Center" MaxLength="64"
+                     ToolTip="Пустое поле — все записи. Для применения поиска нажмите «Найти / обновить»." />
+        </DockPanel>
+        <DataGrid x:Name="RecordsDataGrid" Grid.Row="2" IsReadOnly="True" AutoGenerateColumns="False"
+                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False"
+                  SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column"
+                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                  SelectionChanged="RecordsDataGrid_SelectionChanged" MouseDoubleClick="RecordsDataGrid_MouseDoubleClick"
+                  AutomationProperties.Name="Записи координат">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID объекта справочника" Binding="{Binding ObjectId}" Width="190" />
+                <DataGridTextColumn Header="GUID объекта" Binding="{Binding ObjectGuid}" Width="290" />
+                <DataGridTextColumn Header="Матрица трансформации" Binding="{Binding PlacementDisplay}" Width="*" MinWidth="300" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock x:Name="StatusTextBlock" Grid.Row="3" Margin="0,12" TextWrapping="Wrap" Foreground="#4B5563"
+                   AutomationProperties.LiveSetting="Polite" />
+        <DockPanel Grid.Row="4">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="SelectButton" Content="Загрузить матрицу" IsEnabled="False"
+                        Style="{StaticResource PrimaryButtonStyle}" Click="SelectButton_Click" />
+                <Button Content="Отмена" IsCancel="True" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="PreviousButton" Content="Назад" IsEnabled="False" Click="PreviousButton_Click" />
+                <TextBlock x:Name="PageTextBlock" VerticalAlignment="Center" Margin="4,0,12,0" />
+                <Button x:Name="NextButton" Content="Далее" IsEnabled="False" Click="NextButton_Click" />
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

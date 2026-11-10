@@ -10,149 +10,155 @@
         MinHeight="700"
         WindowStartupLocation="CenterScreen">
 
-    <TabControl Margin="12">
-        <TabItem Header="Редактор матрицы">
-            <Grid Margin="20">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+    <DockPanel Margin="12">
+        <Button DockPanel.Dock="Top" Content="Настройки подключения к БД…" HorizontalAlignment="Right"
+                Margin="0,0,0,8" Click="DatabaseSettingsButton_Click" />
+        <TabControl>
+            <TabItem Header="Редактор матрицы">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                    <TextBlock Text="Координаты объектов" FontSize="24" FontWeight="SemiBold" />
-                    <TextBlock Text="Загрузите одну матрицу преобразования, измените её значения и сохраните результат в XML."
-                               Margin="0,5,0,0"
-                               Foreground="#4B5563"
-                               TextWrapping="Wrap" />
-                </StackPanel>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock Text="Координаты объектов" FontSize="24" FontWeight="SemiBold" />
+                        <TextBlock Text="Загрузите одну матрицу преобразования, измените её значения и сохраните результат в XML."
+                                   Margin="0,5,0,0"
+                                   Foreground="#4B5563"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
 
-                <GroupBox Grid.Row="1" Header="1. Исходные данные" Padding="12" Margin="0,0,0,14">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="105" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="Вставьте XML-блок TransformationMap или откройте файл .txt/.xml:"
-                                   Margin="0,0,0,7" />
-                        <TextBox x:Name="InputTextBox"
-                                 Grid.Row="1"
-                                 AcceptsReturn="True"
-                                 TextWrapping="NoWrap"
-                                 HorizontalScrollBarVisibility="Auto"
-                                 VerticalScrollBarVisibility="Auto"
-                                 FontFamily="Consolas"
-                                 SpellCheck.IsEnabled="False" />
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Content="Загрузить строку"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Click="LoadStringButton_Click" />
-                            <Button Content="Открыть файл…" Click="OpenFileButton_Click" />
-                        </StackPanel>
-                    </Grid>
-                </GroupBox>
-
-                <GroupBox x:Name="EditorGroupBox"
-                          Grid.Row="2"
-                          Header="2. Просмотр и редактирование"
-                          Padding="12"
-                          IsEnabled="False">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock FontWeight="SemiBold" Text="Матрица преобразования 4 × 4" />
-                            <TextBlock Margin="0,4,0,8"
-                                       Foreground="#4B5563"
+                    <GroupBox Grid.Row="1" Header="1. Исходные данные" Padding="12" Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="105" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Вставьте XML-блок TransformationMap, откройте файл .txt/.xml или выберите запись из PostgreSQL:"
                                        TextWrapping="Wrap"
-                                       Text="m11–m33 — поворот и масштаб; m41–m43 — смещение; остальные элементы задают однородное преобразование." />
-
-                            <Border BorderBrush="{StaticResource BorderBrush}"
-                                    BorderThickness="1"
-                                    Background="#FAFAFA"
-                                    Padding="8"
-                                    HorizontalAlignment="Left">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="32" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="26" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Column="1" Text="1" HorizontalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Column="2" Text="2" HorizontalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Column="3" Text="3" HorizontalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Column="4" Text="4" HorizontalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Row="1" Text="1" VerticalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Row="2" Text="2" VerticalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Row="3" Text="3" VerticalAlignment="Center" Foreground="#6B7280" />
-                                    <TextBlock Grid.Row="4" Text="4" VerticalAlignment="Center" Foreground="#6B7280" />
-
-                                    <TextBox x:Name="M11TextBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m11" />
-                                    <TextBox x:Name="M12TextBox" Grid.Row="1" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m12" />
-                                    <TextBox x:Name="M13TextBox" Grid.Row="1" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m13" />
-                                    <TextBox x:Name="M14TextBox" Grid.Row="1" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m14" />
-                                    <TextBox x:Name="M21TextBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m21" />
-                                    <TextBox x:Name="M22TextBox" Grid.Row="2" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m22" />
-                                    <TextBox x:Name="M23TextBox" Grid.Row="2" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m23" />
-                                    <TextBox x:Name="M24TextBox" Grid.Row="2" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m24" />
-                                    <TextBox x:Name="M31TextBox" Grid.Row="3" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m31" />
-                                    <TextBox x:Name="M32TextBox" Grid.Row="3" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m32" />
-                                    <TextBox x:Name="M33TextBox" Grid.Row="3" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m33" />
-                                    <TextBox x:Name="M34TextBox" Grid.Row="3" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m34" />
-                                    <TextBox x:Name="M41TextBox" Grid.Row="4" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m41" />
-                                    <TextBox x:Name="M42TextBox" Grid.Row="4" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m42" />
-                                    <TextBox x:Name="M43TextBox" Grid.Row="4" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m43" />
-                                    <TextBox x:Name="M44TextBox" Grid.Row="4" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m44" />
-                                </Grid>
-                            </Border>
-
-                            <TextBlock Text="Смещение объекта" FontWeight="SemiBold" Margin="0,14,0,7" />
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel Margin="0,0,14,0">
-                                    <TextBlock Text="X (m41)" Margin="0,0,0,4" />
-                                    <TextBox x:Name="XTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
-                                </StackPanel>
-                                <StackPanel Margin="0,0,14,0">
-                                    <TextBlock Text="Y (m42)" Margin="0,0,0,4" />
-                                    <TextBox x:Name="YTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
-                                </StackPanel>
-                                <StackPanel>
-                                    <TextBlock Text="Z (m43)" Margin="0,0,0,4" />
-                                    <TextBox x:Name="ZTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                                <Button Content="Применить изменения" Click="ApplyChangesButton_Click" />
-                                <Button Content="Сбросить изменения" Click="ResetChangesButton_Click" />
-                                <Button Content="Сохранить в XML…"
+                                       Margin="0,0,0,7" />
+                            <TextBox x:Name="InputTextBox"
+                                     Grid.Row="1"
+                                     AcceptsReturn="True"
+                                     TextWrapping="NoWrap"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas"
+                                     SpellCheck.IsEnabled="False" />
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Content="Загрузить строку"
                                         Style="{StaticResource PrimaryButtonStyle}"
-                                        Click="SaveFileButton_Click" />
+                                        Click="LoadStringButton_Click" />
+                                <Button Content="Открыть файл…" Click="OpenFileButton_Click" />
+                                <Button Content="Загрузить из БД…" Click="OpenDatabaseButton_Click" />
                             </StackPanel>
-                        </StackPanel>
-                    </ScrollViewer>
-                </GroupBox>
+                        </Grid>
+                    </GroupBox>
 
-                <TextBlock x:Name="StatusTextBlock"
-                           Grid.Row="3"
-                           Margin="0,12,0,0"
-                           Foreground="#4B5563"
-                           TextWrapping="Wrap"
-                           Text="Ожидается загрузка координат." />
-            </Grid>
-        </TabItem>
-        <TabItem Header="Сравнение матриц">
-            <views:MatrixComparisonView />
-        </TabItem>
-    </TabControl>
+                    <GroupBox x:Name="EditorGroupBox"
+                              Grid.Row="2"
+                              Header="2. Просмотр и редактирование"
+                              Padding="12"
+                              IsEnabled="False">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock FontWeight="SemiBold" Text="Матрица преобразования 4 × 4" />
+                                <TextBlock Margin="0,4,0,8"
+                                           Foreground="#4B5563"
+                                           TextWrapping="Wrap"
+                                           Text="m11–m33 — поворот и масштаб; m41–m43 — смещение; остальные элементы задают однородное преобразование." />
+
+                                <Border BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        Background="#FAFAFA"
+                                        Padding="8"
+                                        HorizontalAlignment="Left">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="26" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Column="1" Text="1" HorizontalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Column="2" Text="2" HorizontalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Column="3" Text="3" HorizontalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Column="4" Text="4" HorizontalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Row="1" Text="1" VerticalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Row="2" Text="2" VerticalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Row="3" Text="3" VerticalAlignment="Center" Foreground="#6B7280" />
+                                        <TextBlock Grid.Row="4" Text="4" VerticalAlignment="Center" Foreground="#6B7280" />
+
+                                        <TextBox x:Name="M11TextBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m11" />
+                                        <TextBox x:Name="M12TextBox" Grid.Row="1" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m12" />
+                                        <TextBox x:Name="M13TextBox" Grid.Row="1" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m13" />
+                                        <TextBox x:Name="M14TextBox" Grid.Row="1" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m14" />
+                                        <TextBox x:Name="M21TextBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m21" />
+                                        <TextBox x:Name="M22TextBox" Grid.Row="2" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m22" />
+                                        <TextBox x:Name="M23TextBox" Grid.Row="2" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m23" />
+                                        <TextBox x:Name="M24TextBox" Grid.Row="2" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m24" />
+                                        <TextBox x:Name="M31TextBox" Grid.Row="3" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m31" />
+                                        <TextBox x:Name="M32TextBox" Grid.Row="3" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m32" />
+                                        <TextBox x:Name="M33TextBox" Grid.Row="3" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m33" />
+                                        <TextBox x:Name="M34TextBox" Grid.Row="3" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m34" />
+                                        <TextBox x:Name="M41TextBox" Grid.Row="4" Grid.Column="1" Style="{StaticResource MatrixCellStyle}" ToolTip="m41" />
+                                        <TextBox x:Name="M42TextBox" Grid.Row="4" Grid.Column="2" Style="{StaticResource MatrixCellStyle}" ToolTip="m42" />
+                                        <TextBox x:Name="M43TextBox" Grid.Row="4" Grid.Column="3" Style="{StaticResource MatrixCellStyle}" ToolTip="m43" />
+                                        <TextBox x:Name="M44TextBox" Grid.Row="4" Grid.Column="4" Style="{StaticResource MatrixCellStyle}" ToolTip="m44" />
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Text="Смещение объекта" FontWeight="SemiBold" Margin="0,14,0,7" />
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Margin="0,0,14,0">
+                                        <TextBlock Text="X (m41)" Margin="0,0,0,4" />
+                                        <TextBox x:Name="XTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0,0,14,0">
+                                        <TextBlock Text="Y (m42)" Margin="0,0,0,4" />
+                                        <TextBox x:Name="YTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Text="Z (m43)" Margin="0,0,0,4" />
+                                        <TextBox x:Name="ZTranslationTextBox" Style="{StaticResource TranslationCellStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                    <Button Content="Применить изменения" Click="ApplyChangesButton_Click" />
+                                    <Button Content="Сбросить изменения" Click="ResetChangesButton_Click" />
+                                    <Button Content="Сохранить в XML…"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Click="SaveFileButton_Click" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </GroupBox>
+
+                    <TextBlock x:Name="StatusTextBlock"
+                               Grid.Row="3"
+                               Margin="0,12,0,0"
+                               Foreground="#4B5563"
+                               TextWrapping="Wrap"
+                               Text="Ожидается загрузка координат." />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Сравнение матриц">
+                <views:MatrixComparisonView />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>

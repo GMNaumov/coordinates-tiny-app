@@ -6,8 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Проверяем исходную предметную логику без зависимости от WPF и сторонних пакетов. -->
+    <!-- Проверяем модели и сервисы без зависимости от WPF. -->
     <Compile Include="../../src/CoordinatesTinyApp/Models/*.cs" Link="Models/%(Filename)%(Extension)" />
     <Compile Include="../../src/CoordinatesTinyApp/Services/*.cs" Link="Services/%(Filename)%(Extension)" />
+    <PackageReference Include="Npgsql" Version="8.0.9" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 </Project>

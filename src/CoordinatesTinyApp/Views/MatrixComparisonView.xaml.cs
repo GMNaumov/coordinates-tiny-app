@@ -25,6 +25,28 @@ public partial class MatrixComparisonView : UserControl
         OpenFile(SecondInputTextBox, "Вторая матрица");
     }
 
+    private void OpenFirstDatabaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenDatabase(FirstInputTextBox, "Первая матрица");
+    }
+
+    private void OpenSecondDatabaseButton_Click(object sender, RoutedEventArgs e)
+    {
+        OpenDatabase(SecondInputTextBox, "Вторая матрица");
+    }
+
+    private void OpenDatabase(TextBox inputTextBox, string matrixName)
+    {
+        string? xml = DatabaseDialogs.SelectPlacement(Window.GetWindow(this));
+
+        if (xml is null)
+            return;
+
+        inputTextBox.Text = xml;
+        ClearResult();
+        ShowStatus($"{matrixName} загружена из PostgreSQL. Нажмите «Сравнить матрицы».", Brushes.DarkSlateGray);
+    }
+
     private void OpenFile(TextBox inputTextBox, string matrixName)
     {
         var dialog = new OpenFileDialog
